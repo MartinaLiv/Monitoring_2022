@@ -15,3 +15,32 @@ plot(water, fishes)
 # a table in R is called data frame
 
 streams <- data.frame(water, fishes)
+
+#set workingdirectory
+
+getwd()
+setwd("C:/Users/marti/OneDrive/Documents/lab/")
+
+# export data!
+
+write.table(streams, file = "my_first_table.txt")
+
+#import
+
+read.table("my_first_table.txt")
+
+#let's assign it to an object in R
+
+martinatable <- read.table("my_first_table.txt")
+
+# the first statistics
+
+summary(martinatable)
+
+#if we want to get info only on fishes
+
+summary(martinatable$fishes)
+
+hist(martinatable$fishes)
+
+hist(martinatable$water)
