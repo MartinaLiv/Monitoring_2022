@@ -106,6 +106,21 @@ plotRGB(l2011, r=4, g=3, b=2, stretch= "Lin") #false colours
 plotRGB(l2011, r=3, g=4, b=2, stretch= "Lin") #false colours
 plotRGB(l2011, r=3, g=2, b=4, stretch= "Lin") #false colours
 
+------final day------
 
+plotRGB(l2011, r=4, g=3, b=2, stretch= "Lin") #false colours
+plotRGB(l2011, r=4, g=3, b=2, stretch= "Hist")
+
+# importing past data
+l1988 <- brick("p224r63_1988.grd")
+
+par(mfrow=c(2,1))
+plotRGB(l1988, r=4,g=3, b=2,stretch= "Lin")
+plotRGB(l2011, r=4, g=3, b=2, stretch= "Lin")
+
+#put the NIR in the blue channel
+par(mfrow=c(2,1))
+plotRGB(l1988,r=2, g=3, b=4, stretch= "Lin")
+plotRGB(l2011, r=2, g=3, b=4, stretch= "Lin")
 
 
