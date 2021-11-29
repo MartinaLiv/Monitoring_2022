@@ -63,5 +63,35 @@ dev.off()
 #plot only the first image of the stack
 plot(en$EN_0001, col=cl)
 
-#rgb
+#rgb plot
 plotRGB(en, r=1, g=7, b=13, stretch='Lin')
+
+#-------day2-------
+#we are going to import all the data together with the function lapply
+#lapply() apply a function to a list or a vector
+#we have to make a list with the function list.files()
+
+rlist <- list.files(pattern="EN")
+
+#lapply
+list_rast <- lapply(rlist, raster)
+
+#make a stack with all images
+EN_stack <- stack(list_rast)
+
+#plot the stack 
+cl <- colorRampPalette(c('red', 'orange', 'yellow'))(100) #palette
+plot(EN_stack, col=cl)
+
+#excercise: plot only the first image of the stack
+plot(EN_stack$EN_0001, col=cl)
+
+#difference between the first image and the last one
+ENdif<- EN_stack$EN_0001 - EN_stack$EN_0013
+cldif <- colorRampPalette(c('blue', 'white', 'red'))(100) #palette
+plot(ENdif, col=cldif)
+
+#automated processing source function --> read code from a File or Connection
+source("Code.txt")
+
+
