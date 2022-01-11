@@ -52,4 +52,16 @@ points(presences, pch=19)
 plot(preds$precipitation, col=cl)
 points(presences, pch=19)
 
+#day2
+#upload script with the function source
+setwd("C:/Users/marti/OneDrive/Documents/lab/")
+source("R_code_source_sdm.r")
+
+preds # elevation, precipitation, temperature, vegetation 
+
 #model
+#we have to explain to the software which are the data we are going to use
+datasdm <- sdmData(train=species, predictors=preds)
+
+#generalized linear model
+m1 <- sdm(Occurrence~temperature+elevation+precipitation+vegetation, data=datasdm, methods= "glm") # we put the y (Occurrence) and xs (preds) and then the model will calculate the intercept and the slope. 
