@@ -65,3 +65,14 @@ datasdm <- sdmData(train=species, predictors=preds)
 
 #generalized linear model
 m1 <- sdm(Occurrence~temperature+elevation+precipitation+vegetation, data=datasdm, methods= "glm") # we put the y (Occurrence) and xs (preds) and then the model will calculate the intercept and the slope. 
+
+#prediction: build the final map 
+p1 <- predict(m1, newdata=preds)
+plot(p1, col=cl)
+
+#add to the stack
+s1 <- stack(preds, p1)
+#change the name of a dataset with the function names()
+names(s1) <- c("elevation", "precipitation", "temperature", "vegetation", "model")
+
+
