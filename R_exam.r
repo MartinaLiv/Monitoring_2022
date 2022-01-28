@@ -85,7 +85,9 @@ bar_1 + bar_2
 #paper Gallardo et. al (2015) --> the importance of human footprint in shaping the distribution of freshwater invaders
 
 #I want to add data on population density
-
+pop_density_2020 <- raster("gpw_v4_population_density_rev11_2020_30_min.tif")
+cl <- colorRampPalette(c('red ', 'orange', 'yellow'))(100)
+plot(pop_density_2020, col=cl)
 
     
                 
