@@ -1,4 +1,5 @@
-#represent distribution of an endogenous European crayfish (Austropotamobius pallipes) vs distribution of invasive Louisiana crawfish (Procambarus clarkii) in Europe
+#represent distribution of an endogenous European crayfish (Austropotamobius pallipes) vs distribution of invasive Louisiana crawfish (Procambarus clarkii) in Europe and create a model to represent the probability distribution of P. clarkii in a Climate Change scenario. 
+
 
 #set the working directory
 setwd("/Users/marti/OneDrive/Documents/lab/exam/exam_monitoring")
@@ -10,6 +11,10 @@ library(ggplot2)
 library(rgbif)
 library(sp)
 library(raster)
+library(RStoolbox)
+library(viridis)
+library(dismo)
+library(rgdal)
 library(patchwork)
 
 #let's start with the autochthonous species
@@ -82,13 +87,124 @@ bar_2 <- ggplot(ds2, aes(x= Var1, y=Freq))+ geom_bar(stat= "identity", fill= "da
 #let's see the two barplots 
 bar_1 + bar_2
 
-#paper Gallardo et. al (2015) --> the importance of human footprint in shaping the distribution of freshwater invaders
+#Sdm 
+#present climate data on WorldClim
+# I selected Annual Mean Temperature and Annual Precipitation based on previous works
+present.temperature <- raster("wc2.1_2.5m_bio_1.tif")
+present.precipitation <- raster("wc2.1_2.5m_bio_12.tif")
 
-#I want to add data on population density
-pop_density_2020 <- raster("gpw_v4_population_density_rev11_2020_30_min.tif")
-cl <- colorRampPalette(c('red ', 'orange', 'yellow'))(100)
-plot(pop_density_2020, col=cl)
+#crop on Europe
+ext <- c(-35, 50, 35, 75)
+present.temperature <- crop(present.temperature, ext)
+present.precipitation <- crop(present.precipitation, ext)
 
-    
+#future climate variable 2081-2100 Shared Socioeconomic Pathway 8.5 (RCP 8.5)
+future.clim <- brick("wc2.1_2.5m_bioc_BCC-CSM2-MR_ssp585_2081-2100.tif")
+
+#select variables of interest
+future.temperature <- future.clim$wc2.1_2.5m_bioc_BCC.CSM2.MR_ssp585_2081.2100.1
+future.precipitation <- future.clim$wc2.1_2.5m_bioc_BCC.CSM2.MR_ssp585_2081.2100.12
+
+#crop them on Europe
+future.temperature <- crop(future.temperature, ext)
+future.precipitation <- crop(future.precipitation, ext)
+
+#plot them
+cl <- colorRampPalette(c('blue4','cyan',"chartreuse","orangered","darkred"))(100)
+#plot together historical climatic variables and future climatic variables
+par(mfrow=c(2,2))
+plot(present.temperature, main= "Historical Annual mean temperature", col=cl)
+plot(future.temperature, main ="Projected Annual mean temperature 2081-2100 ", col= cl)
+plot(present.precipitation, main= "Historical Annual precipitation", col= cl)
+plot(future.precipitation, main= "Projected Annual precipitation for 2081-2100", col=cl)
+
+dev.off()
+
+#compute the difference to see the change
+diff_temperature <- future.temperature - present.temperature
+diff_precipitation <- future.precipitation - present.precipitation
+
+#plot the difference
+plot(diff_temperature, main= "Difference in Annual mean temperature", col= cl)
+
+plot(diff_precipitation, main= "Difference in Annual precipitation", col= cl)
+
+dev.off()
+
+#plot distribution of invasive species on Annual mean Temperature to have a first representation 
+plot(present.temperature, main= "Historical Annual mean temperature", col=cl)
+points(dat2_loc, pch= 17, col= "black")# P. clarkii
+legend(x= -35, y=50, legend =  "P. clarkii", col= "black", pch = 17)
+
+#let's see if the distribution of P. clarkii change because of climate change (hypothesis: expand?)
+#MAXENT
+#create  stacks with climatic variables
+present <- stack(present.temperature, present.precipitation)
+future <- stack(future.temperature, future.precipitation)
+names(future) <- names(present) #assign the same name
+
+#prepare occurrence data for the model
+#remove erroneous coordinates
+occ_clean <- subset(dat2, (!is.na(decimalLatitude)) & (!is.na(decimalLongitude)))
+cat(nrow(dat2)- nrow(occ_clean), "records are removed") # 0 records removed
+
+#remove duplicates
+dups <- duplicated(occ_clean[c("decimalLatitude", "decimalLongitude")])
+occ_unique <- occ_clean[!dups, ]
+cat(nrow(occ_clean) - nrow(occ_unique), "records are removed") #949 records removed
+
+#make occ spatial
+coordinates(occ_unique) <- ~decimalLongitude + decimalLatitude
+
+#look for erraneous points by plotting
+plot(present[[1]]) #first layer representing temperature
+plot(occ_unique, add= T) #plot occ on the above raster layer
+#it seems there are no erranous points
+
+#we want to use only one occurrence point per pixel so we need to thin our occurrence data
+cells <- cellFromXY(present[[1]], occ_unique)
+dups <- duplicated(cells)
+occ_final <- occ_unique[!dups, ]
+cat(nrow(occ_unique) - nrow(occ_final), "records are removed") #2969 records are removed!!
+
+plot(present[[1]])
+plot(occ_final, add= T, col= "red") #last look 
+
+#create the model
+model <- maxent(x=present, p= occ_final, ngb=20000)
+
+#response curve: P of finding the species at those values of the variables
+plot(model) #variable contribution: more mean annual temperature than precipitation
+response(model) #P of occurrence on temperature and precipitation
+
+#prediction with historical data
+map_hist <- predict(model, present) # Probable suitability based on historical conditions
+
+#prediction with future data
+map_future <- predict(model, future)#Probable suitability based on projected future conditions
+
+#save raster layers
+writeRaster(map_hist, filename = "C:/Users/marti/OneDrive/Documents/lab/exam/exam_monitoring/final/present")
+writeRaster(map_future, filename = "C:/Users/marti/OneDrive/Documents/lab/exam/exam_monitoring/final/future")
+
+#plot
+names(map_hist) <- "Probability"
+p1 <- ggplot() + geom_raster(map_hist, mapping = aes(x = x, y = y, fill= Probability)) + scale_fill_viridis(option = "viridis", na.value = "transparent")+ theme_bw() + ggtitle("Present distribution probabilities of the Louisiana crawfish") + 
+  labs(x = "Longitude", y = "Latitude")
+
+plot(p1)
+
+names(map_future) <- "Probability"
+p2 <- ggplot() + geom_raster(map_future, mapping = aes(x = x, y = y, fill= Probability)) + scale_fill_viridis(option = "viridis", na.value = "transparent")+ theme_bw() + ggtitle("Future distribution probabilities of the Louisiana crawfish") + 
+  labs(x = "Longitude", y = "Latitude") 
+
+plot(p2)
+
+
+#plot together
+p1 + p2
+
+
+
                 
 
