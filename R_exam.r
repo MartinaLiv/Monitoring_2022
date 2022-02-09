@@ -178,14 +178,15 @@ plot(model) #variable contribution: more mean annual temperature than precipitat
 response(model) #P of occurrence on temperature and precipitation
 
 #prediction with historical data
-map_hist <- predict(model, present) # Probable suitability based on historical conditions
+map_hist <- predict(model, present) # Probable suitability of P. clarkii based on historical conditions
 
 #prediction with future data
-map_future <- predict(model, future)#Probable suitability based on projected future conditions
+map_future <- predict(model, future)#Probable suitability of P. clarkii based on projected future conditions
 
 #save raster layers
 writeRaster(map_hist, filename = "C:/Users/marti/OneDrive/Documents/lab/exam/exam_monitoring/final/present")
 writeRaster(map_future, filename = "C:/Users/marti/OneDrive/Documents/lab/exam/exam_monitoring/final/future")
+
 
 #plot
 names(map_hist) <- "Probability"
@@ -203,6 +204,73 @@ plot(p2)
 
 #plot together
 p1 + p2
+
+#let's create also the model for A. pallipes to see if the distribution change (reduction?)
+#prepare data for the model
+occ_clean1 <- subset(dat1, (!is.na(decimalLatitude)) & (!is.na(decimalLongitude)))
+cat(nrow(dat1)- nrow(occ_clean1), "records are removed") # 0 records removed
+
+#remove duplicates
+dups1 <- duplicated(occ_clean1[c("decimalLatitude", "decimalLongitude")])
+occ_unique1 <- occ_clean1[!dups1, ]
+cat(nrow(occ_clean1) - nrow(occ_unique1), "records are removed") #3241 records are removed
+
+# make occ spatial
+coordinates(occ_unique1) <- ~decimalLongitude + decimalLatitude
+
+#look for erraneous points by plotting
+plot(present[[1]]) #first layer: temperature
+plot(occ_unique1, add= T) #plot occ on the above raster layer
+#it seems there are no erranous points
+
+#we want to use for the model only one occurrence point per pixel--> thin data
+cells1 <- cellFromXY(present[[1]], occ_unique1)
+dups1 <- duplicated(cells1)
+occ_final1 <- occ_unique1[!dups1, ]
+cat(nrow(occ_unique1) - nrow(occ_final1), "records are removed") #488 records are removed
+
+plot(present[[1]])
+plot(occ_final1, add= T, col= "darkgreen") #last look
+
+#create the model
+model1 <- maxent(x= present, p= occ_final1, ngb= 20000)
+
+#response curve
+plot(model1) #variable contribution: precipitation more than annual mean temperature
+response(model1)#P of occurrence on temperature and precipitation
+
+#prediction with historical data
+map_hist1 <- predict(model1, present) #Probable suitability of A. pallipes based on historical conditions
+
+#prediction with future data
+map_future1 <- predict(model1, future) #Probable suitability of A. pallipes based on projected future conditions
+
+#save raster layers
+writeRaster(map_hist1, filename = "C:/Users/marti/OneDrive/Documents/lab/exam/exam_monitoring/final/present/present1")
+writeRaster(map_future1, filename = "C:/Users/marti/OneDrive/Documents/lab/exam/exam_monitoring/final/future/future1")
+
+#plot
+names(map_hist1) <- "Probability"
+p3 <- ggplot() + geom_raster(map_hist1, mapping = aes(x = x, y = y, fill= Probability)) + scale_fill_viridis(option = "plasma", na.value = "transparent")+ theme_bw() + ggtitle("Present distribution probabilities of European crayfish") + 
+  labs(x = "Longitude", y = "Latitude")
+
+plot(p3)
+
+names(map_future1) <- "Probability"
+p4 <- ggplot() + geom_raster(map_future1, mapping = aes(x = x, y = y, fill= Probability)) + scale_fill_viridis(option = "plasma", na.value = "transparent")+ theme_bw() + ggtitle("Future distribution probabilities of European crayfish") + 
+  labs(x = "Longitude", y = "Latitude")
+
+plot(p4)
+
+#plot the two together
+p3 + p4
+
+
+#all plot together
+patch1 <- p1 + p2
+patch2 <- p3 + p4
+
+patch1 / patch2
 
 
 
