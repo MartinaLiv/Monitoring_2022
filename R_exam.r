@@ -1,4 +1,5 @@
-#represent distribution of an endogenous European crayfish (Austropotamobius pallipes) vs distribution of invasive Louisiana crawfish (Procambarus clarkii) in Europe and create a model to represent the probability distribution of P. clarkii in a Climate Change scenario. 
+#represent distribution of an endogenous European crayfish (Austropotamobius pallipes) vs distribution of invasive Louisiana crawfish (Procambarus clarkii) in Europe
+#create a model to represent the probability distribution of P. clarkii and A. pallipes in a Climate Change scenario. 
 
 
 #set the working directory
