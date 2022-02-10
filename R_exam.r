@@ -3,7 +3,7 @@
 
 
 #set the working directory
-setwd("/Users/marti/OneDrive/Documents/lab/exam/exam_monitoring")
+setwd("/Users/marti/OneDrive/Documents/lab/exam/exam_monitoring/final")
 
 #recall packages I want to use
 library(dplyr)
