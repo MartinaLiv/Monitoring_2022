@@ -126,10 +126,12 @@ diff_temperature <- future.temperature - present.temperature
 diff_precipitation <- future.precipitation - present.precipitation
 
 #plot the difference
-plot(diff_temperature, main= "Difference in Annual mean temperature", col= cl)
+cl1 <- colorRampPalette(c('red', 'orange', 'yellow'))(100)
+cl2 <- colorRampPalette(c("cyan", "blue", "darkblue"))(100)
 
-plot(diff_precipitation, main= "Difference in Annual precipitation", col= cl)
-
+par(mfrow= c(1, 2))
+plot(diff_temperature, main= "Difference in Annual mean temperature", col= cl1)
+plot(diff_precipitation, main= "Difference in Annual precipitation", col= cl2)
 dev.off()
 
 #plot distribution of invasive species on Annual mean Temperature to have a first representation 
