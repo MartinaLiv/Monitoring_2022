@@ -62,7 +62,7 @@ points(dat2_loc, pch= 17, col= "darkred")
 plot(wrld_simpl, xlim=c(-35,50), ylim=c(50,50))
 points(dat1_loc, pch=16, col= "darkgreen") #A. pallipes
 points(dat2_loc, pch= 17, col= "darkred")# P. clarkii
-legend(x= -35, y=50, legend = c("A. pallipe", "P. clarkii"), col=c("darkgreen", "darkred"), pch = c(16, 17)) # add a legend to identify the two different species
+legend(x= -37, y=50, legend = c("A. pallipes", "P. clarkii"), col=c("darkgreen", "darkred"), pch = c(16, 17)) # add a legend to identify the two different species
 
 #let's try to count the occurrences of the two species in Europe
 t1 <- table(dat1$countryCode)
