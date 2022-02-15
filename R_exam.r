@@ -73,7 +73,7 @@ ds1 <- as.data.frame(t1)
 ds2 <- as.data.frame(t2)
 
 bar_1 <- ggplot(ds1, aes(x= Var1, y=Freq))+ geom_bar(stat= "identity", fill= "darkgreen")+
-  labs(x="Country Code", y="Occurrences", title = "Occurrences of A. pallipe in Europe") #barplot of A. pallipe
+  labs(x="Country Code", y="Occurrences", title = "Occurrences of A. pallipes in Europe") #barplot of A. pallipe
  
  bar_1
  
